@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es">
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <h1>SISTEMA DE CONTROL Y MONITOREO<br />DESHIDRATADOR DE FRUTAS</h1>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 40px;
+      background-color: #f4f4f4;
+    }
+    .container {
+      width: 60%;
+      margin: auto;
+      background-color: #fff;
+      padding: 40px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+
+    .indicator {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 30px;
+      justify-items: center;
+      margin: 20px auto;
+      max-width: 500px;
+    }
+
+    .indicator div {
+      width: 200px;
+      height: 100px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+
+    .label-text {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 5px;
+    }
+
+    .value-text {
+      font-size: 24px;
+    }
+
+    .temperature {
+      background-color: rgba(255, 140, 0, 0.6);
+    }
+    .humidity {
+      background-color: rgba(0, 123, 255, 0.6);
+    }
+    .fan {
+      background-color: rgba(0, 200, 100, 0.6);
+      font-size: 20px;
+    }
+    .heater {
+      background-color: rgba(200, 0, 0, 0.6);
+      font-size: 20px;
+    }
+
+    label,
+    select {
+      font-size: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .select-fruit {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .select-fruit label {
+      margin-right: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .select-fruit select {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+
+  <div class="container">
+    <div class="select-fruit">
+      <label for="fruit-select" id="fruit-label">Selecciona una fruta:</label>
+      <select id="fruit-select" onchange="changeFruitImage()">
+        <option value="manzana">MANZANA</option>
+        <option value="platano">PLÁTANO</option>
+        <option value="pera">PERA</option>
+      </select>
+    </div>
+
+    <div class="indicator">
+      <div class="temperature" id="temp-label">
+        <div class="label-text">Temperatura</div>
+        <div class="value-text">-- °C</div>
+      </div>
+      <div class="humidity" id="humidity-label">
+        <div class="label-text">Humedad</div>
+        <div class="value-text">-- %</div>
+      </div>
+      <div class="fan" id="fan-label">Ventilador: --</div>
+      <div class="heater" id="heater-label">Resistencia: --</div>
+    </div>
+
+    <div class="button-container">
+      <button onclick="startMonitoring()">Iniciar Monitoreo</button>
+    </div>
+  </div>
+
+  <script>
+    function changeFruitImage() {
+      const fruit = document.getElementById("fruit-select").value;
+      const label = document.getElementById("fruit-label");
+
+      label.classList.remove("apple-bg", "banana-bg", "pear-bg");
+
+      if (fruit === "manzana") {
+        label.classList.add("apple-bg");
+      } else if (fruit === "platano") {
+        label.classList.add("banana-bg");
+      } else if (fruit === "pera") {
+        label.classList.add("pear-bg");
+      }
+    }
+
+    function updateData(temp, humidity, ventilador, resistencia) {
+      document.querySelector("#temp-label .value-text").textContent = temp + " °C";
+      document.querySelector("#humidity-label .value-text").textContent = humidity + " %";
+      document.getElementById("fan-label").textContent = "Ventilador: " + ventilador;
+      document.getElementById("heater-label").textContent = "Resistencia: " + resistencia;
+    }
+
+    function startMonitoring() {
+      fetch("/data.json")
+        .then((response) => response.json())
+        .then((data) => {
+          updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
+        })
+        .catch((error) => {
+          console.error("Error al obtener los datos:", error);
+        });
+
+      setInterval(() => {
+        fetch("/data.json")
+          .then((response) => response.json())
+          .then((data) => {
+            updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
+          })
+          .catch((error) => {
+            console.error("Error al actualizar los datos:", error);
+          });
+      }, 5000);
+    }
+
+    window.onload = startMonitoring;
+  </script>
+</html>
