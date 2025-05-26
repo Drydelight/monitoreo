@@ -103,7 +103,7 @@
   <div class="container">
     <div class="select-fruit">
       <label for="fruit-select" id="fruit-label">Selecciona una fruta:</label>
-      <select id="fruit-select" onchange="changeFruitImage()">
+      <select id="fruit-select" onchange="changeFruit()">
         <option value="manzana">MANZANA</option>
         <option value="platano">PLÁTANO</option>
         <option value="pera">PERA</option>
@@ -129,19 +129,21 @@
   </div>
 
   <script>
-    function changeFruitImage() {
-      const fruit = document.getElementById("fruit-select").value;
-      const label = document.getElementById("fruit-label");
+    // Función para enviar fruta seleccionada al ESP en mayúsculas y sin acentos
+    function changeFruit() {
+      const fruitSelect = document.getElementById("fruit-select");
+      let fruit = fruitSelect.value;
 
-      label.classList.remove("apple-bg", "banana-bg", "pear-bg");
+      // Convertir a mayúsculas y reemplazar acentos
+      fruit = fruit.toUpperCase();
+      fruit = fruit.replace("Á", "A");
 
-      if (fruit === "manzana") {
-        label.classList.add("apple-bg");
-      } else if (fruit === "platano") {
-        label.classList.add("banana-bg");
-      } else if (fruit === "pera") {
-        label.classList.add("pear-bg");
-      }
+      // Enviar al ESP la fruta seleccionada
+      fetch(`http://192.168.1.85/setFruit?fruit=${fruit}`)
+        .then(() => {
+          console.log('Fruta cambiada a', fruit);
+        })
+        .catch(err => console.error('Error al cambiar fruta:', err));
     }
 
     function updateData(temp, humidity, ventilador, resistencia) {
@@ -152,7 +154,7 @@
     }
 
     function startMonitoring() {
-      fetch("/data.json")
+      fetch("http://192.168.1.85/data.json")
         .then((response) => response.json())
         .then((data) => {
           updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
@@ -162,7 +164,7 @@
         });
 
       setInterval(() => {
-        fetch("/data.json")
+        fetch("http://192.168.1.85/data.json")
           .then((response) => response.json())
           .then((data) => {
             updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
@@ -173,6 +175,11 @@
       }, 5000);
     }
 
-    window.onload = startMonitoring;
+    window.onload = () => {
+      startMonitoring();
+
+      // Enviar el valor inicial al cargar la página para que ESP tenga la fruta correcta
+      changeFruit();
+    }
   </script>
 </html>
