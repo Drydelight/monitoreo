@@ -139,7 +139,7 @@
       fruit = fruit.replace("Á", "A");
 
       // Enviar al ESP la fruta seleccionada
-      fetch(`http://192.168.1.85/setFruit?fruit=${fruit}`)
+      fetch(`http://192.168.0.123/setFruit?fruit=${fruit}`)
         .then(() => {
           console.log('Fruta cambiada a', fruit);
         })
@@ -154,7 +154,7 @@
     }
 
     function startMonitoring() {
-      fetch("http://192.168.1.85/data.json")
+      fetch("http://192.168.0.123/data.json")
         .then((response) => response.json())
         .then((data) => {
           updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
@@ -164,7 +164,7 @@
         });
 
       setInterval(() => {
-        fetch("http://192.168.1.85/data.json")
+        fetch("http://192.168.0.123/data.json")
           .then((response) => response.json())
           .then((data) => {
             updateData(data.temperatura, data.humedad, data.ventilador, data.resistencia);
